@@ -82,7 +82,8 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path):
                 print(terminal_colors.CYELLOW +
                       addr2line.before.strip().replace(remove_from_path, "") + terminal_colors.CEND)
         else:
-            print(terminal_colors.CYELLOW + "0x40000000: " + terminal_colors.CEND)
+            print(terminal_colors.CYELLOW + "0x40000000: top of call stack reached" +
+                  terminal_colors.CEND)
 
     print("")
 
