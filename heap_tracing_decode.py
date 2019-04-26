@@ -88,11 +88,11 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path):
 
 
 def heap_trace_in_list(heap_trace_search, heap_traces):
-    for heap_trace in heap_traces:
+    for index, heap_trace in enumerate(heap_traces):
         if heap_trace == heap_trace_search:
-            return True
+            return index
 
-    return False
+    return -1
 
 
 if __name__ == "__main__":
@@ -152,8 +152,8 @@ if __name__ == "__main__":
                     "call_stack": match_heap_trace.group("call_stack").strip(":").split(":")
                 }
 
-                if heap_trace["nb_bytes"] > args.min_allocation_bytes and heap_trace_in_list(
-                        heap_trace, heap_traces) is False:
+                index_in_list = heap_trace_in_list(heap_trace, heap_traces)
+                if heap_trace["nb_bytes"] > args.min_allocation_bytes and index_in_list < 0:
                     heap_traces.append(heap_trace)
                     print(terminal_colors.CRED + line + terminal_colors.CEND)
                     print_call_stack_info(heap_trace["call_stack"], symbol_file,
