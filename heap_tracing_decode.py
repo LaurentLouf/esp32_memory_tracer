@@ -149,7 +149,7 @@ if __name__ == "__main__":
                     "nb_bytes": match_heap_trace.group("nb_bytes"),
                     "memory_location": match_heap_trace.group("memory_location"),
                     "cpu_count": match_heap_trace.group("cpu_count"),
-                    "call_stack": match_heap_trace.group("call_stack").split(":")
+                    "call_stack": match_heap_trace.group("call_stack").strip(":").split(":")
                 }
 
                 if heap_trace["nb_bytes"] > args.min_allocation_bytes and heap_trace_in_list(
