@@ -129,9 +129,38 @@ if __name__ == "__main__":
             "(?P<nb_bytes>[0-9]+) bytes \(@ (?P<memory_location>[0-9a-z]+)\) allocated CPU [0-9]+ ccount (?P<cpu_count>[0-9a-z]+) caller (?P<call_stack>[0-9a-z:]+)"
         )
         start_block_detected = False
+        end_block_detected = False
         heap_traces = []
 
-        # Iterate through the lines
+        # Get the latest heap traces block : it will contain memory still allocated at the end of watching,
+        # so we will avoid having memory allocations that are freed long after they are allocated
+        for line in reversed(lines):
+            line = line.strip()
+            match_start_block = pattern_start.match(line)
+            match_end_block = pattern_end.match(line)
+            match_heap_trace = pattern_heap_trace.match(line)
+
+            # Beginning of new block in reverse order : end block detected first
+            if end_block_detected is False and match_end_block is not None:
+                end_block_detected = True
+            # End of heap trace block in reverse order : reaching start of block
+            elif end_block_detected is True and match_start_block is not None:
+                end_block_detected = False
+            # Inside a heap trace block on a heap trace line
+            elif end_block_detected is True and match_start_block is None and match_heap_trace is not None:
+                heap_trace = {
+                    "nb_bytes": match_heap_trace.group("nb_bytes"),
+                    "memory_location": match_heap_trace.group("memory_location"),
+                    "cpu_count": match_heap_trace.group("cpu_count"),
+                    "call_stack": match_heap_trace.group("call_stack").strip(":").split(":")
+                }
+
+                index_in_list = heap_trace_in_list(heap_trace, heap_traces)
+                if heap_trace["nb_bytes"] > args.min_allocation_bytes and index_in_list < 0:
+                    heap_traces.append(heap_trace)
+
+        # Iterate through the lines and print memory traces that matches those found in the last block of heap
+        # traces found
         for line in lines:
             line = line.strip()
             match_start_block = pattern_start.match(line)
@@ -153,9 +182,10 @@ if __name__ == "__main__":
                     "call_stack": match_heap_trace.group("call_stack").strip(":").split(":")
                 }
 
+                # If the item is found in the heap traces, display it and remove it from the list
                 index_in_list = heap_trace_in_list(heap_trace, heap_traces)
-                if heap_trace["nb_bytes"] > args.min_allocation_bytes and index_in_list < 0:
-                    heap_traces.append(heap_trace)
+                if index_in_list >= 0:
+                    del heap_traces[index_in_list]
                     print(terminal_colors.CRED + line + terminal_colors.CEND)
                     print_call_stack_info(heap_trace["call_stack"], symbol_file,
                                           args.remove_from_path)
