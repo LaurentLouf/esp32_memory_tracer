@@ -1,0 +1,48 @@
+menu "Memory tracing"
+
+config MEMORY_TRACING_ENABLE
+    bool "Enable memory tracing"
+    default n
+    help
+        Enables the memory tracing module. If disabled, calling the function to start memory tracing will have no effect
+
+config MEMORY_TRACING_TASK_STACK_SIZE
+    int "Memory tracing task's stack size"
+    default 2048
+    depends on MEMORY_TRACING_ENABLE
+    range 512 8192
+    help
+        Stack size for the memory tracing task
+
+config MEMORY_TRACING_INTERVAL_DISPLAY_FREE_HEAP_MS
+    int "Interval between displays of the free heap, in ms"
+    depends on MEMORY_TRACING_ENABLE
+    default 1000
+    range 10 3600000
+    help
+        This determines interval in ms between two displays of the free heap.
+
+config MEMORY_TRACING_ENABLE_HEAP_TRACES_DUMP
+    bool "Enable the heap trace dump"
+    default n
+    depends on MEMORY_TRACING_ENABLE
+    help
+        Enables the dump of the heap trace at regular intervals
+
+config MEMORY_TRACING_NB_FREE_HEAP_DISPLAY_BEFORE_TRACE_DUMP
+    int "Number of displays of the free heap before dumping the heap trace"
+    depends on MEMORY_TRACING_ENABLE_HEAP_TRACES_DUMP
+    default 10
+    range 1 65535
+    help
+        This determines the number of displays of the free heap before dumping the heap trace.
+
+config MEMORY_TRACING_NUMBER_RECORDS
+    int "Maximum number of records for the buffer containing the heap traces"
+    depends on MEMORY_TRACING_ENABLE_HEAP_TRACES_DUMP
+    default 200
+    range 1 1000
+    help
+        This determines the maximum number of records for the buffer containing the heap traces. This buffer is allocated in internal RAM.
+
+endmenu

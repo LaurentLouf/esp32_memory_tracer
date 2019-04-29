@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include "FreeRTOS.h"
-#include "defines.h"
 #include "freertos/task.h"
 
 void main_memory_tracing(void* pvParameters);
