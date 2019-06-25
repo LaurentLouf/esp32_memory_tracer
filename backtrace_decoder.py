@@ -5,7 +5,8 @@ from __future__ import print_function
 import argparse
 import sys
 import pexpect
-
+import colorama
+import re
 
 def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
     # Print the call stack associated with this heap trace
@@ -18,6 +19,15 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
                 match = addr2line.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=2)
                 if match == 0:
                     print(addr2line.before.strip().replace(remove_from_path, ""))
+            elif tool == "gdb":
+                gdb = pexpect.spawn("xtensa-esp32-elf-gdb --batch " + symbol_file + " -ex \"set listsize 1\" -ex \"l *" + address + "\"")
+                gdb.logfile = None
+                match = gdb.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=2)
+                if match == 0:
+                    output_filtered = gdb.before.strip().replace(remove_from_path, "")
+                    components = re.match(r".*(?P<address>0x[0-9a-z]+) is in (?P<function>\S+) \((?P<file>.*):(?P<line>[0-9]+)\)", output_filtered)
+                    if components is not None:
+                        print(colorama.Style.RESET_ALL + colorama.Fore.RED + components.group('address') + colorama.Style.RESET_ALL + " : " + colorama.Fore.GREEN + components.group('function') + colorama.Style.RESET_ALL + " in " + colorama.Fore.BLUE + components.group('file') + ":" + colorama.Style.BRIGHT + components.group('line'))
         else:
             print("0x40000000: top of call stack reached")
 
@@ -25,6 +35,8 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
 
 
 if __name__ == "__main__":
+    colorama.init()
+
     # Define an argument parser and parse the arguments
     parser = argparse.ArgumentParser("Decode the backtrace given as argument")
     parser.add_argument(
