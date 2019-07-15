@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # Define an argument parser and parse the arguments
     parser = argparse.ArgumentParser("Decode the backtrace given as argument")
     parser.add_argument(
-        "symbol_file",
+        "--symbol_file",
         help=
         "Path to the symbol file corresponding to the executable that has been executed to produce the heap tracing",
         type=open)
