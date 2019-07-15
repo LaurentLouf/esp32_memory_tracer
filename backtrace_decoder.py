@@ -53,7 +53,7 @@ if __name__ == "__main__":
         help=
         "Path to the symbol file corresponding to the executable that has been executed to produce the heap tracing",
         type=open)
-    parser.add_argument("backtrace", help="Backtrace printed by the ESP32", nargs='*')
+    parser.add_argument("--backtrace", help="Backtrace printed by the ESP32", type=argparse.FileType('r'))
     parser.add_argument(
         "--remove_from_path",
         help="Remove a string from the paths displayed for a more concise display",
@@ -67,9 +67,13 @@ if __name__ == "__main__":
 
     if args.backtrace is not None and args.symbol_file is not None:
         symbol_file = args.symbol_file.name
-        if args.backtrace[0] != "Backtrace:":
-            print("Incorrect format detected, expected to receive a string beginning with \"Backtrace: \"")
+        backtrace = args.backtrace.readline().split(" ")
+
+        if backtrace[0] != "Backtrace:":
+            print(
+                "Incorrect format detected, expected to receive a string beginning with \"Backtrace: \""
+            )
             sys.exit(-1)
 
-        backtrace = [address[0:address.find(":")] for address in reversed(args.backtrace[1:])]
+        backtrace = [address[0:address.find(":")] for address in reversed(backtrace[1:])]
         print_call_stack_info(backtrace, symbol_file, args.remove_from_path, args.tool)
