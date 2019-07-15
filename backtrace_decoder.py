@@ -28,7 +28,7 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
                 if match == 0:
                     output_filtered = gdb.before.strip().replace(remove_from_path, "")
                     components = re.match(
-                        r".*(?P<address>0x[0-9a-z]+) is in (?P<function>\S+) \((?P<file>.*):(?P<line>[0-9]+)\)",
+                        r".*(?P<address>0x[0-9a-z]+) is in (?P<function>.*) \((?P<file>.*):(?P<line>[0-9]+)\)\.\s*?\n[0-9]+\s+(?P<code>(\s*\S*)*)",
                         output_filtered)
                     if components is not None:
                         print(colorama.Style.RESET_ALL + colorama.Fore.RED +
