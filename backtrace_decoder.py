@@ -37,6 +37,11 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
                               colorama.Style.RESET_ALL + " in " + colorama.Fore.BLUE +
                               components.group('file') + ":" + colorama.Style.BRIGHT +
                               components.group('line'))
+                    else:
+                        print(gdb.before.strip().replace(remove_from_path, ""))
+                else:
+                    print("xtensa-esp32-elf-gdb --batch " + symbol_file +
+                          " -ex \"set listsize 1\" -ex \"l *" + address + "\"")
         else:
             print("0x40000000: top of call stack reached")
 
