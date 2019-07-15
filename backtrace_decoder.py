@@ -53,7 +53,8 @@ if __name__ == "__main__":
         help=
         "Path to the symbol file corresponding to the executable that has been executed to produce the heap tracing",
         type=open)
-    parser.add_argument("--backtrace", help="Backtrace printed by the ESP32", type=argparse.FileType('r'))
+    parser.add_argument(
+        "--backtrace", help="Backtrace printed by the ESP32", type=argparse.FileType('r'))
     parser.add_argument(
         "--remove_from_path",
         help="Remove a string from the paths displayed for a more concise display",
