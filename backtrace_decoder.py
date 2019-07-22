@@ -27,16 +27,25 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
                 match = gdb.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=2)
                 if match == 0:
                     output_filtered = gdb.before.strip().replace(remove_from_path, "")
-                    components = re.match(
+                    components_normal = re.match(
                         r".*(?P<address>0x[0-9a-z]+) is in (?P<function>.*) \((?P<file>.*):(?P<line>[0-9]+)\)\.\s*?\n[0-9]+\s+(?P<code>(\s*\S*)*)",
                         output_filtered)
-                    if components is not None:
+                    components_assembly = re.match(
+                        r".*(?P<address>0x[0-9a-z]+) is at (?P<file>.*):(?P<line>[0-9]+)\.\s*?\n[0-9]+\s+(?P<code>(\s*\S*)*)",
+                        output_filtered)
+
+                    if components_normal is not None:
                         print(colorama.Style.RESET_ALL + colorama.Fore.RED +
-                              components.group('address') + colorama.Style.RESET_ALL + " : " +
-                              colorama.Fore.GREEN + components.group('function') +
+                              components_normal.group('address') + colorama.Style.RESET_ALL +
+                              " : " + colorama.Fore.GREEN + components_normal.group('function') +
                               colorama.Style.RESET_ALL + " in " + colorama.Fore.BLUE +
-                              components.group('file') + ":" + colorama.Style.BRIGHT +
-                              components.group('line'))
+                              components_normal.group('file') + ":" + colorama.Style.BRIGHT +
+                              components_normal.group('line'))
+                    elif components_assembly is not None:
+                        print(colorama.Style.RESET_ALL + colorama.Fore.RED +
+                              components_assembly.group('address') + colorama.Style.RESET_ALL +
+                              " : " + colorama.Fore.BLUE + components_assembly.group('file') + ":" +
+                              colorama.Style.BRIGHT + components_assembly.group('line'))
                     else:
                         print(gdb.before.strip().replace(remove_from_path, ""))
                 else:
