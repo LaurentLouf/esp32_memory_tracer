@@ -57,6 +57,15 @@ def print_call_stack_info(call_stack, symbol_file, remove_from_path, tool):
     print("")
 
 
+def print_core_dump_info(symbol_file, path_core_dump_tool, core_dump):
+    decoder = pexpect.spawn(path_core_dump_tool + " info_corefile --core-format b64 --core " +
+                            core_dump + " " + symbol_file)
+    decoder.logfile = None
+    match = decoder.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=2)
+    if match == 0:
+        print(decoder.before.strip())
+
+
 if __name__ == "__main__":
     colorama.init()
 
@@ -78,8 +87,19 @@ if __name__ == "__main__":
         help="Specify the tool to use for address decoding",
         choices=['addr2line', 'gdb'],
         default='gdb')
+    parser.add_argument(
+        "--core_dump",
+        help=
+        "Core dump printed by the ESP32, corresponding to everything between the \"CORE DUMP START\" and \"CORE DUMP END\" lines",
+        type=argparse.FileType('r'))
+    parser.add_argument(
+        "--path_core_dump_tool",
+        help="Path to the \"espcoredump.py\" tool. Usually in esp-idf/components/espcoredump/ ",
+        type=argparse.FileType('r'))
+
     args = parser.parse_args()
 
+    # Backtrace decoding
     if args.backtrace is not None and args.symbol_file is not None:
         symbol_file = args.symbol_file.name
         backtrace = args.backtrace.readline().split(" ")
@@ -92,3 +112,11 @@ if __name__ == "__main__":
 
         backtrace = [address[0:address.find(":")] for address in reversed(backtrace[1:])]
         print_call_stack_info(backtrace, symbol_file, args.remove_from_path, args.tool)
+
+    # Core dump decoding
+    if args.core_dump is not None and args.path_core_dump_tool is not None:
+        symbol_file = args.symbol_file.name
+        path_core_dump_tool = args.path_core_dump_tool.name
+        core_dump = args.core_dump.name
+
+        print_core_dump_info(symbol_file, path_core_dump_tool, core_dump)

@@ -1,3 +1,2 @@
-backtrace.txt
-backtrace.out
-
+*.txt
+*.out
