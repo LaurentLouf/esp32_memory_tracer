@@ -34,6 +34,7 @@ void main_memory_tracing(void* pvParameters) {
     uint16_t i_free_heap_display;
     uint32_t ccount;
     while (1) {
+#ifdef CONFIG_MEMORY_TRACING_ENABLE_HEAP_TRACES_DUMP
         for (i_free_heap_display = 0;
              i_free_heap_display < CONFIG_MEMORY_TRACING_NB_FREE_HEAP_DISPLAY_BEFORE_TRACE_DUMP;
              i_free_heap_display++) {
@@ -43,8 +44,12 @@ void main_memory_tracing(void* pvParameters) {
                      ccount & ~3, ccount & 1);
         }
 
-#ifdef CONFIG_MEMORY_TRACING_ENABLE_HEAP_TRACES_DUMP
         heap_trace_dump();
+#else
+        vTaskDelay(CONFIG_MEMORY_TRACING_INTERVAL_DISPLAY_FREE_HEAP_MS / portTICK_PERIOD_MS);
+        ccount = get_ccount();
+        ESP_LOGI(TAG, "Free heap size %d, ccount 0x%08x, core %d", esp_get_free_heap_size(),
+                 ccount & ~3, ccount & 1);
 #endif
     }
 #endif
