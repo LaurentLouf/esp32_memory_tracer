@@ -8,6 +8,10 @@
 #include "esp_heap_trace.h"
 #include "esp_log.h"
 
+#if defined(CONFIG_MEMORY_TRACING_ENABLE) && !defined(CONFIG_HEAP_TRACING)
+#error "Heap tracing (CONFIG_HEAP_TRACING) not activated but mandatory for MemoryTracing module"
+#endif
+
 #ifdef CONFIG_MEMORY_TRACING_ENABLE_HEAP_TRACES_DUMP
 static heap_trace_record_t
     trace_record[CONFIG_MEMORY_TRACING_NUMBER_RECORDS];  // This buffer must be in internal RAM
